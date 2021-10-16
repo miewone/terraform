@@ -3,6 +3,6 @@ resource "aws_vpc" "wgpark_vpc" {
       instance_tenancy = "default"
 
       tags = {
-            name = "wgpark-vpc"
+            Name = "wgpark-vpc"
       }
 }
