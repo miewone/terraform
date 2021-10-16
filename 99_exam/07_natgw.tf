@@ -5,6 +5,9 @@ resource "aws_eip" "wgpark_eip_pria" {
 resource "aws_eip" "wgpark_eip_pric" {
       vpc = true
 }
+resource "aws_eip" "wgpark_eip_instance" {
+      vpc = true
+}
 
 resource "aws_nat_gateway" "wgpark_ngw_pria" {
   allocation_id   = aws_eip.wgpark_eip_pria.id
