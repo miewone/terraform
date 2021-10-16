@@ -8,13 +8,15 @@ resource "aws_db_instance" "wgpark_rds" {
   engine               = "mysql"                #엔진
   engine_version       = "5.7"
   instance_class       = "db.t3.micro"
-  name                 = "mydb"
+  name                 = "wordpress"
   username             = "wordpress"
   password             = "It12345!"
   parameter_group_name = "default.mysql5.7"
-  skip_final_snapshot  = false
+  
   db_subnet_group_name = aws_db_subnet_group.database.id
 
+  vpc_security_group_ids = [aws_security_group.wgpark_allow_mysql.id]
+  skip_final_snapshot  = true
   tags = {
     Name = "wgpark-mysql-rds"
   }
