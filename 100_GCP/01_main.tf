@@ -22,3 +22,16 @@ resource "google_compute_subnetwork" "wgpark_subent_pri" {
   network       = google_compute_network.vpc_network.id
 }
 
+resource "google_comput_insatnce" "wgpark_instance" {
+  name          = "wgpark_instance"
+  machine_type  = "e2-micro"
+  zone          = "asia-northeast3-a"
+
+  tags          = ["wgpark-tf"]
+
+  boot_disk {
+    initialize_params {
+      image     = ""
+    }
+  }
+}
