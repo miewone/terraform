@@ -1,6 +1,8 @@
 provider "google" {
+  credentials = "${file("../keys/cloudexperience-58fb82c5a542.json")}"
   project = "cloudexperience"
   region  = "asia-northeast3"
+  zone    = "asia-northeast3-a"
 }
 
 resource "google_compute_network" "vpc_network" {
@@ -22,16 +24,42 @@ resource "google_compute_subnetwork" "wgpark_subent_pri" {
   network       = google_compute_network.vpc_network.id
 }
 
-resource "google_comput_insatnce" "wgpark_instance" {
-  name          = "wgpark_instance"
+resource "google_compute_firewall" "wgpark_firewall" {
+  name          = "wgpark-firewall"
+  network       = google_compute_network.vpc_network.name
+
+  allow {
+    protocol    = "tcp"
+    ports       = ["80","22"]
+  }
+  source_tags   = ["web-ssh"]
+}
+resource "google_compute_instance" "wgpark_instance" {
+  name          = "wgparkinstance"
   machine_type  = "e2-micro"
   zone          = "asia-northeast3-a"
 
   tags          = ["wgpark-tf"]
 
-  boot_disk {
-    initialize_params {
-      image     = ""
+  metadata_startup_script =<<-EOF
+#!/bin/bash
+yum install -y httpd
+systemctl start httpd
+systemctl enable httpd
+                            EOF
+  network_interface {
+    network = google_compute_network.vpc_network.id
+    subnetwork = google_compute_subnetwork.wgpark_subent_pub.id
+
+    access_config {
+
     }
   }
+  boot_disk {
+    initialize_params {
+      image     = "centos-7-v20210916"
+      size      = "20"
+    }
+  }
+
 }
