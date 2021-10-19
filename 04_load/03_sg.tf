@@ -1,7 +1,7 @@
 resource "aws_security_group" "wgpark_allow_http" {
   name        = "allow_httpssh"
   description = "Allow Http inbound traffic"
-  vpc_id      = aws_vpc.wgpark_vpc.id
+  vpc_id      = aws_vpc.wgpark_vpc_lb.id
 
   ingress = [
     {
@@ -50,7 +50,7 @@ resource "aws_security_group" "wgpark_allow_http" {
 resource "aws_security_group" "wgpark_allow_mysql" {
   name        = "allow_mysql"
   description = "Allow mysql inbound traffic"
-  vpc_id      = aws_vpc.wgpark_vpc.id
+  vpc_id      = aws_vpc.wgpark_vpc_lb.id
 
   ingress = [
     {
@@ -87,7 +87,7 @@ resource "aws_security_group" "wgpark_allow_mysql" {
 
 resource "aws_security_group" "wgpark_alb" {
   name        = "terraform-wgpark-alb"
-  vpc_id      = aws_vpc.wgpark_vpc.id
+  vpc_id      = aws_vpc.wgpark_vpc_lb.id
   ingress {
     from_port         = 80
     to_port           = 80

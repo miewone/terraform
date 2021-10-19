@@ -1,4 +1,4 @@
-resource "aws_db_subnet_group" "database" {
+  resource "aws_db_subnet_group" "database" {
   name = "wgpark_db_subnet_group"
   subnet_ids = [aws_subnet.wgpark_pria.id,aws_subnet.wgpark_pric.id]
 }

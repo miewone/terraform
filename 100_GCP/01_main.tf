@@ -42,11 +42,14 @@ resource "google_compute_instance" "wgpark_instance" {
   tags          = ["wgpark-tf"]
 
   metadata_startup_script =<<-EOF
-#!/bin/bash
-yum install -y httpd
-systemctl start httpd
-systemctl enable httpd
+                              #!/bin/bash
+                              yum install -y httpd
+                              systemctl start httpd
+                              systemctl enable httpd
                             EOF
+  metadata = {
+    ssh-keys = "${var.gcp_ssh_user}:${file("../keys/tf-gcp-key.pub")}"
+  }
   network_interface {
     network = google_compute_network.vpc_network.id
     subnetwork = google_compute_subnetwork.wgpark_subent_pub.id

@@ -1,0 +1,10 @@
+│ Error: Error creating Auto Scaling Group: ValidationError: Provided Target Group
+        'arn:aws:elasticloadbalancing:ap-northeast-2:701558900840:targetgroup/wgpark-lb-target-group/
+        d2929824aacd35fb' has invalid target type. Please ensure all provided Target
+        Groups have target type of instance.
+│       status code: 400, request id: d306818f-6b6f-4773-892c-93f734acdfbc
+│
+│   with aws_autoscaling_group.wgpark_auto_group,
+│   on 17_ASG.tf line 1, in resource "aws_autoscaling_group" "wgpark_auto_group":
+│    1: resource "aws_autoscaling_group" "wgpark_auto_group"{
+│

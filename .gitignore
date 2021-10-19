@@ -2,3 +2,5 @@
 **/keys
 *.tfstate
 *.tfstate.backup
+**/*.json
+*.json
