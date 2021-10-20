@@ -3,10 +3,10 @@ module "test" {
 
   tagsName               = "wgpark"
   subnet_az              = ["a", "c"]
-  region                 = "ap-northeast-1"
-  vpc_cidr               = "10.0.0.0/16"
-  subnet_pub_cidr_list   = ["10.0.1.0/24", "10.0.2.0/24"]
-  subnet_pri_cidr_list   = ["10.0.3.0/24", "10.0.4.0/24"]
+  region                 = "ap-northeast-3"
+  vpc_cidr               = "192.168.0.0/16"
+  subnet_pub_cidr_list   = ["192.168.1.0/24", "192.168.2.0/24"]
+  subnet_pri_cidr_list   = ["192.168.3.0/24", "192.168.4.0/24"]
   rt_pub_route_cidrblock = "0.0.0.0/0"
   rt_pir_route_cidrblock = "0.0.0.0/0"
 
@@ -54,7 +54,7 @@ module "test" {
       key_name      = "aws_terraform_tf"
 
       availability_zone = "ap-northeast-2a"
-      private_ip        = "10.0.1.13"
+      private_ip        = "192.168.1.13"
 
       user_data = <<-EOF
                              #!/bin/bash
@@ -70,7 +70,7 @@ module "test" {
       key_name      = "aws_terraform_tf"
 
       availability_zone = "ap-northeast-2c"
-      private_ip        = "10.0.2.13"
+      private_ip        = "192.168.2.13"
 
       user_data = <<-EOF
                              #!/bin/bash
@@ -143,7 +143,7 @@ module "test" {
       from_port        = 3306
       to_port          = 3306
       protocol         = "tcp"
-      cidr_blocks       = ["10.0.1.0/24","10.0.2.0/24"]
+      cidr_blocks       = ["192.168.1.0/24","192.168.2.0/24"]
       ipv6_cidr_blocks = ["::/0"]
       prefix_list_ids  = null
       security_groups  = null
