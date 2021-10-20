@@ -65,15 +65,45 @@ variable "sg_list_egress" {
     }
   ))
 }
+
+variable "sg_rds_list_ingress" {
+  type        = list(object(
+    {
+      description       = string
+      from_port         = number
+      to_port           = number
+      protocol          = string
+      cidr_blocks       = list(string)
+      ipv6_cidr_blocks  = list(string)
+      security_groups   = list(string)
+      prefix_list_ids   = list(string)
+      self              = string
+    }
+  ))
+}
+
+variable "sg_rds_list_egress" {
+  type        = list(object(
+    {
+      description       = string
+      from_port         = number
+      to_port           = number
+      protocol          = string
+      cidr_blocks       = list(string)
+      ipv6_cidr_blocks  = list(string)
+      security_groups   = list(string)
+      prefix_list_ids   = list(string)
+      self              = string
+    }
+  ))
+}
 variable "ec2_instances" {
   type                  = list(object({
     ami                    = string
     instance_type          = string
     key_name               = string
-#    vpc_security_group_ids = [aws_security_group.wgpark_allow_http.id]
     availability_zone      = string
     private_ip             = string
-#    subnet_id              = aws_subnet.wgpark_pub[0].id
     user_data              = string
   }))
 }
@@ -122,4 +152,19 @@ variable "as_conf" {
 }
 variable "eip_pris" {
   type = number
+}
+
+variable "rds" {
+  type = object({
+    allocated_storage    = number
+    engine               = string
+    engine_version       = string
+    instance_class       = string
+    name                 = string
+    username             = string
+    password             = string
+    parameter_group_name = string
+
+    skip_final_snapshot  = bool
+  })
 }
