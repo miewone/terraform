@@ -44,14 +44,6 @@ resource "google_compute_instance" "wgpark_bastioninstance" {
   zone         = "${var.gcp_region}-${var.gcp_az_list[0]}"
 
   tags = ["wgpark-bastionhost"]
-
-  #  metadata_startup_script = <<-EOF
-  #                              #!/bin/bash
-  #                              yum install -y httpd
-  #                              systemctl start httpd
-  #                              systemctl enable httpd
-  #                            EOF
-
   network_interface {
     network    = google_compute_network.vpc_network.id
     subnetwork = google_compute_subnetwork.wgpark_subent_pubs[0].id
