@@ -10,7 +10,7 @@ resource "google_compute_network" "vpc_network" {
 }
 
 resource "google_compute_subnetwork" "wgpark_subent_pubs" {
-  count         = length(var.gcp_subnet_pub_list)
+  count         = length(var.gcp_subnet_pub_listc04)
   name          = "wgaprk-subnet-pub${count.index}"
   #  ip_cidr_range = "10.0.0.0/24"
   ip_cidr_range = var.gcp_subnet_pub_list[count.index]
