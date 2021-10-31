@@ -7,7 +7,7 @@ locals {
 }
 
 provider "google" {
-  credentials = file("E:/OneDrive/OneDrive - 동명대학교/99_베스핀교육/Bespin_EDU/13_Terraform/keys/cloudexperience-58fb82c5a542.json")
+  credentials = file("../../../keys/cloudexperience-58fb82c5a542.json")
   region      = local.region
   project     = local.project
 }
@@ -30,6 +30,24 @@ resource "google_compute_subnetwork" "wgpark-subnet-pri" {
   network       = google_compute_network.wgpark-vpc.name
   ip_cidr_range = var.gcpSubnetPri[count.index]
 }
+resource "google_compute_firewall" "wgpark-firewall" {
+  name    = "wgpark-firewall"
+  network = google_compute_network.wgpark-vpc.name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"  ]
+  }
+
+  allow {
+    protocol = "tcp"
+    ports    = ["80", "8080"]
+  }
+
+  source_ranges = ["0.0.0.0/0"]
+}
+
+
 
 resource "google_compute_instance" "wgpark-bastioninstance" {
   name         = "${local.name}-bastion"
@@ -47,7 +65,7 @@ resource "google_compute_instance" "wgpark-bastioninstance" {
     }
   }
   metadata = {
-    ssh-keys = "${var.gcp-sshkey}:${file("E:/OneDrive/OneDrive - 동명대학교/99_베스핀교육/Bespin_EDU/13_Terraform/keys/tf-gcp-key.pub")}"
+    ssh-keys = "${var.gcp-sshkey}:${file("../../../keys/tf-gcp-key.pub")}"
   }
 
   boot_disk {
@@ -56,6 +74,21 @@ resource "google_compute_instance" "wgpark-bastioninstance" {
       size  = "20"
     }
   }
+}
+
+resource "google_compute_router" "wgpark-router" {
+  name    = "my-router"
+  network = google_compute_network.wgpark-vpc.id
+  region  = local.region
+}
+
+resource "google_compute_router_nat" "wgpark-nat" {
+  name                               = "my-router-nat"
+  router                             = google_compute_router.wgpark-router.name
+  region                             = google_compute_router.wgpark-router.region
+  nat_ip_allocate_option             = "AUTO_ONLY"
+  source_subnetwork_ip_ranges_to_nat = "ALL_SUBNETWORKS_ALL_IP_RANGES"
+
 }
 ########################################
 #####  오토 스케일링 구성을 위한 부분 #######
@@ -82,8 +115,13 @@ resource "google_compute_instance_template" "wgpark-template-front" {
   }
 
   metadata = {
-    ssh-keys = "${var.gcp-sshkey}:${file("E:/OneDrive/OneDrive - 동명대학교/99_베스핀교육/Bespin_EDU/13_Terraform/keys/tf-gcp-key.pub")}"
+    startup-script = file("../../../file/100_GCP.sh")
+    ssh-keys = "${var.gcp-sshkey}:${file("../../../keys/tf-gcp-key.pub")}"
   }
+
+#  depends_on = [
+#    google_sql_database_instance.wgaprk-mysql
+#  ]
   #  require
   #  dick,machine_type,networkinterface
   #
@@ -97,7 +135,6 @@ resource "google_compute_instance_group_manager" "wgpark-instance-group" {
 
   base_instance_name = "wgpark-autoscaling"
 
-  target_pools = [google_compute_target_pool.wgpark-tgp.id]
   target_size  = 2
   # zone을 리전별로할려면 사용할 모든 가용존을 주면됨.
   #  zone = ["${local.region}${var.gcp-az[0]}","${local.region}${var.gcp-az[1]}"]
@@ -116,6 +153,9 @@ resource "google_compute_instance_group_manager" "wgpark-instance-group" {
     health_check      = google_compute_health_check.wgpark-autohealing.id
     initial_delay_sec = 10
   }
+  depends_on = [
+    google_compute_router_nat.wgpark-nat
+  ]
 }
 
 resource "google_compute_health_check" "wgpark-autohealing" {
@@ -131,14 +171,14 @@ resource "google_compute_health_check" "wgpark-autohealing" {
   }
 }
 
-resource "google_compute_target_pool" "wgpark-tgp" {
-  name = "${local.name}-tgp"
-
-  instances = [
-    "asia-northeast3-a/test1",
-    "asia-northeast3-b/test2",
-  ]
-}
+#resource "google_compute_target_pool" "wgpark-tgp" {
+#  name = "${local.name}-tgp"
+#
+#  instances = [
+#    "asia-northeast3-a/test1",
+#    "asia-northeast3-b/test2",
+#  ]
+#}
 #####  오토 스케일링 구성을 위한 부분 #######
 ########################################
 
@@ -174,7 +214,7 @@ resource "google_compute_backend_service" "wgpar-backend" {
   enable_cdn            = false
   health_checks         = [google_compute_health_check.wgpark-httplb-health.id]
   backend {
-    group = google_compute_instance_group_manager.wgpark-instance-group.instance_group
+    group           = google_compute_instance_group_manager.wgpark-instance-group.instance_group
     capacity_scaler = 1.0
   }
 }
@@ -188,7 +228,57 @@ resource "google_compute_health_check" "wgpark-httplb-health" {
   unhealthy_threshold = 10 # 50 seconds
 
   http_health_check {
-    request_path = "/"
+    request_path = "/check.html"
     port         = "80"
   }
 }
+
+resource "google_compute_global_address" "wgpark-private-ip-address" {
+
+
+  name          = "db"
+  purpose       = "VPC_PEERING"
+  address_type  = "INTERNAL"
+  address = "10.0.4.0"
+  prefix_length = 24
+  network       = google_compute_network.wgpark-vpc.id
+}
+resource "google_service_networking_connection" "wgparkprivate-vpc-connection" {
+
+
+  network                 = google_compute_network.wgpark-vpc.id
+  service                 = "servicenetworking.googleapis.com"
+  reserved_peering_ranges = [google_compute_global_address.wgpark-private-ip-address.name]
+}
+resource "google_sql_database" "wgpark-database" {
+  name     = "my-database"
+  instance = google_sql_database_instance.wgaprk-mysql.name
+}
+resource "google_sql_database_instance" "wgaprk-mysql" {
+  name             = "${local.name}-mysql"
+  database_version = "MYSQL_5_7"
+  region           = local.region
+
+  settings {
+    tier = "db-f1-micro"
+    ip_configuration {
+      ipv4_enabled    = false
+      private_network = google_compute_network.wgpark-vpc.id
+    }
+  }
+  depends_on = [
+    google_service_networking_connection.wgparkprivate-vpc-connection
+  ]
+}
+resource "google_sql_user" "users" {
+  name     = "wordpress"
+  instance = google_sql_database_instance.wgaprk-mysql.name
+  password = "It12345!"
+}
+resource "google_sql_database" "database" {
+  name     = "wordpress"
+  instance = google_sql_database_instance.wgaprk-mysql.name
+}
+#data "google_sql_database_instance" "wgpark_db" {
+#  name = "${local.name}-mysql"
+#}

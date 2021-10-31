@@ -1,10 +1,9 @@
 #! /bin/bash
 sudo su -
+setenforce 0
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
 
-yum install -y httpd
-
-amazon-linux-extras install php7.4
-amazon-linux-extras enable php7.4
+yum install -y httpd wget
 
 yum -y install epel-release
 yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm
@@ -22,10 +21,11 @@ chown apache.apache /var/www/html/*
 sed -i 's/DirectoryIndex index.html/DirectoryIndex index.php/g' /etc/httpd/conf/httpd.conf
 systemctl start httpd
 systemctl enable httpd
+echo "hi" >> /var/www/html/check.html
 sed -i 's/database_name_here/wordpress/g' /var/www/html/wp-config.php
 sed -i 's/username_here/wordpress/g' /var/www/html/wp-config.php
 sed -i 's/password_here/It12345!/g' /var/www/html/wp-config.php
-sed -i 's/localhost/terraform-20211016153101238200000001.cyzaniwmw0sq.ap-northeast-2.rds.amazonaws.com/g' /var/www/html/wp-config.php
+sed -i 's/localhost/ipaddress/g' /var/www/html/wp-config.php
 
 sed -i "/define( 'AUTH_KEY'/d" /var/www/html/wp-config.php
 sed -i "/define( 'SECURE_AUTH_KEY'/d" /var/www/html/wp-config.php
