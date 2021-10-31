@@ -182,6 +182,8 @@ resource "google_compute_health_check" "wgpark-autohealing" {
 #####  오토 스케일링 구성을 위한 부분 #######
 ########################################
 
+########################################
+############ 로드밸런서 ##################
 resource "google_compute_global_address" "wgpark-pubip" {
   name = "${local.name}-pubip"
 }
@@ -232,7 +234,11 @@ resource "google_compute_health_check" "wgpark-httplb-health" {
     port         = "80"
   }
 }
+############ 로드밸런서 ##################
+########################################
 
+################################################
+############ google cloud sql ##################
 resource "google_compute_global_address" "wgpark-private-ip-address" {
 
 
@@ -279,6 +285,8 @@ resource "google_sql_database" "database" {
   name     = "wordpress"
   instance = google_sql_database_instance.wgaprk-mysql.name
 }
+############ google cloud sql ##################
+################################################
 #data "google_sql_database_instance" "wgpark_db" {
 #  name = "${local.name}-mysql"
 #}
