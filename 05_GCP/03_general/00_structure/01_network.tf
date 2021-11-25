@@ -36,7 +36,7 @@ resource "google_compute_firewall" "wgpark-firewall" {
 
   allow {
     protocol = "tcp"
-    ports    = ["22"  ]
+    ports    = ["22"]
   }
 
   allow {
@@ -44,9 +44,9 @@ resource "google_compute_firewall" "wgpark-firewall" {
     ports    = ["80", "8080"]
   }
 
+
   source_ranges = ["0.0.0.0/0"]
 }
-
 
 
 resource "google_compute_instance" "wgpark-bastioninstance" {
@@ -116,12 +116,12 @@ resource "google_compute_instance_template" "wgpark-template-front" {
 
   metadata = {
     startup-script = file("../../../file/100_GCP.sh")
-    ssh-keys = "${var.gcp-sshkey}:${file("../../../keys/tf-gcp-key.pub")}"
+    ssh-keys       = "${var.gcp-sshkey}:${file("../../../keys/tf-gcp-key.pub")}"
   }
 
-#  depends_on = [
-#    google_sql_database_instance.wgaprk-mysql
-#  ]
+  #  depends_on = [
+  #    google_sql_database_instance.wgaprk-mysql
+  #  ]
   #  require
   #  dick,machine_type,networkinterface
   #
@@ -135,10 +135,10 @@ resource "google_compute_instance_group_manager" "wgpark-instance-group" {
 
   base_instance_name = "wgpark-autoscaling"
 
-  target_size  = 2
+  target_size = 2
   # zone을 리전별로할려면 사용할 모든 가용존을 주면됨.
   #  zone = ["${local.region}${var.gcp-az[0]}","${local.region}${var.gcp-az[1]}"]
-  zone         = "asia-northeast3-a"
+  zone        = "asia-northeast3-a"
   version {
     instance_template = google_compute_instance_template.wgpark-template-front.id
   }
@@ -245,7 +245,7 @@ resource "google_compute_global_address" "wgpark-private-ip-address" {
   name          = "db"
   purpose       = "VPC_PEERING"
   address_type  = "INTERNAL"
-  address = "10.0.4.0"
+  address       = "10.0.4.0"
   prefix_length = 24
   network       = google_compute_network.wgpark-vpc.id
 }

@@ -17,3 +17,4 @@ variable "gcp-sshkey" {
   type = string
   description = "인스턴스에 사용할 private키 사용자를 입력해주세요"
 }
+
